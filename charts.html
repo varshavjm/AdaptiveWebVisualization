@@ -1,0 +1,107 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart1);
+      google.charts.setOnLoadCallback(drawChart2);
+
+      function getData(fileName){
+
+
+        var dataResult;
+        $.ajax({                                                                        
+          url: fileName,                                                      
+          async: false,                                                               
+          type: 'GET',                                                                
+          dataType: 'json', // added data type                                        
+          success: function(res) {                                  
+            dataResult = res;                                                       
+          }                                                                           
+        });  
+        return dataResult
+      }
+
+      function drawChart1() {
+
+        var dataResult=getData("http://127.0.0.1:8000/AllActions.txt");
+        let all_items = {'Search':0, 'Favorite':0,'Upvote':0,'Downvote':0,'Comment':0,'Post':0 }
+        
+
+        for(key in dataResult) {
+          let value = dataResult[key];
+          value=value.actions;
+          for(ele in value) {
+            all_items[ele]=all_items[ele]+value[ele];
+          }
+        }
+
+
+        var data = google.visualization.arrayToDataTable([
+          ['Task', 'Actions'],
+          ['Post',     all_items['Post']],
+          ['Comment',      all_items['Comment']],
+          ['Upvote',  all_items['Upvote']],
+          ['Downvote', all_items['Downvote']],
+          ['Search',    all_items['Search']]
+        ]);
+
+        var options = {
+          title: 'All User Activities'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechartGroup'));
+
+        chart.draw(data, options);
+      }
+
+   function drawChart2() {
+        var dataResult=getData("http://127.0.0.1:8000/AllActions.txt");
+        let all_items = {'Search':0, 'Favorite':0,'Upvote':0,'Downvote':0,'Comment':0,'Post':0 }
+        
+
+        for(key in dataResult) {
+          let value = dataResult[key];
+          if(value['userName']==="Abhi"){
+            console.log("I came in");
+            value=value.actions;
+            for(ele in value) {
+              all_items[ele]=all_items[ele]+value[ele];
+          }
+          break;
+          }
+        }
+
+         for(ele in all_items) 
+              console.log(ele+all_items[ele]);
+           
+
+        var data = google.visualization.arrayToDataTable([
+          ['Task', 'Actions'],
+          ['Post',     all_items['Post']],
+          ['Comment',      all_items['Comment']],
+          ['Upvote',  all_items['Upvote']],
+          ['Downvote', all_items['Downvote']],
+          ['Search',    all_items['Search']]
+        ]);
+
+        var options = {
+          title: 'Individual Activities'
+        };
+
+        var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+
+        chart.draw(data, options);
+      }
+
+    </script>
+  </head>
+  <body>
+    <h1> Pie Chart Visualization</h1>
+    <div style="display:block;">
+    <div id="piechartGroup" style="width: 600px; height: 500px;float:left;"></div>
+    <div id="piechart" style="width: 600px; height: 500px;float:right;"></div>
+    </div>
+  </body>
+</html>

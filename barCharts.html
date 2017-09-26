@@ -1,0 +1,68 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+      <script type="text/javascript" src="jquery.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawVisualization);
+
+       function getData(fileName){
+
+
+        var dataResult;
+        $.ajax({                                                                        
+          url: fileName,                                                      
+          async: false,                                                               
+          type: 'GET',                                                                
+          dataType: 'json', // added data type                                        
+          success: function(res) {                                  
+            dataResult = res;                                                       
+          }                                                                           
+        });  
+        return dataResult
+      }
+
+      function drawVisualization() {
+        var data=getData("http://127.0.0.1:8000/AllActions.txt");
+        var all_items = ['Search', 'Favorite','Upvote','Downvote','Comment','Post'];
+        //For filter use delete
+
+        var all_itemsSize=0;
+        for(var item in all_items)
+          all_itemsSize++;
+
+        result=[];
+        result.push(["username"].concat(all_items));                                                                                               
+        for(userid in data) {                                                                                                                      
+          let user = data[userid];                                                                                                               
+          let new_user_data = [user["userName"]]                                                                                                 
+          for (index in all_items) {                                                                                                             
+              let item = all_items[index];                                                                                                       
+              if (item in user.actions) {                                                                                                        
+                  new_user_data.push(+user.actions[item])                                                                                        
+              }else{                                                                                                                             
+                  new_user_data.push(0)                                                                                                          
+              }                                                                                                                                  
+          }                                                                                                                                      
+        result.push(new_user_data);                                                                                                            
+    }                                                                      
+
+        
+        var data = google.visualization.arrayToDataTable(result);
+
+    var options = {
+      title : 'Monthly Coffee Production by Country',
+      vAxis: {title: 'Cups'},
+      hAxis: {title: 'Month'},
+      seriesType: 'bars',
+    };
+
+    var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+    chart.draw(data, options);
+  }
+    </script>
+  </head>
+  <body>
+    <div id="chart_div" style="width: 900px; height: 500px;"></div>
+  </body>
+</html>
