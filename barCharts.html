@@ -3,8 +3,13 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
       <script type="text/javascript" src="jquery.js"></script>
     <script type="text/javascript">
+$(document).ready(function() {
+      var data;
+      var options;
+      var chart; 
       google.charts.load('current', {'packages':['corechart']});
       google.charts.setOnLoadCallback(drawVisualization);
+
 
        function getData(fileName){
 
@@ -14,7 +19,8 @@
           url: fileName,                                                      
           async: false,                                                               
           type: 'GET',                                                                
-          dataType: 'json', // added data type                                        
+          dataType: 'json',
+           // added data type                                        
           success: function(res) {                                  
             dataResult = res;                                                       
           }                                                                           
@@ -23,7 +29,7 @@
       }
 
       function drawVisualization() {
-        var data=getData("http://127.0.0.1:8000/AllActions.txt");
+        data=getData("http://127.0.0.1:8000/AllActions.txt");
         var all_items = ['Search', 'Favorite','Upvote','Downvote','Comment','Post'];
         //For filter use delete
 
@@ -48,21 +54,59 @@
     }                                                                      
 
         
-        var data = google.visualization.arrayToDataTable(result);
+    data = google.visualization.arrayToDataTable(result);
 
-    var options = {
-      title : 'Monthly Coffee Production by Country',
-      vAxis: {title: 'Cups'},
-      hAxis: {title: 'Month'},
+    options = {
+      title : 'Actions of different Users',
+      vAxis: {title: 'Units'},
+      hAxis: {title: 'Users'},
       seriesType: 'bars',
     };
+      var view = new google.visualization.DataView(data);
+      view.setColumns([0,1,2,3,4,5,6]);
 
-    var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
-    chart.draw(data, options);
+    chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+    google.visualization.events.addListener(chart, 'select', function () {
+        highlightBar(chart, options, view);
+    });
+
+    chart.draw(view, options);
   }
+
+
+  function highlightBar(chart, options, view) {
+    var selection = chart.getSelection();
+    console.log(selection);
+    if (selection.length) {
+        var row = selection[0].row;
+        var column = selection[0].column;
+        console.log(row);
+        console.log(column);
+        view.hideColumns([view.getTableColumnIndex(column)]);
+        console.log("Removed column "+ column);
+         chart.draw(view, options);
+    }
+}
+
+
+    // Will accure at document load
+  $("#ResetColumn").on("click",function(){
+     var view = new google.visualization.DataView(data);
+      view.setColumns([0,1,2,3,4,5,6]);
+      chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+      google.visualization.events.addListener(chart, 'select', function () {
+        highlightBar(chart, options, view);
+    });
+       chart.draw(view, options);
+  });
+});
+
+
     </script>
   </head>
   <body>
     <div id="chart_div" style="width: 900px; height: 500px;"></div>
+    <button id="ResetColumn"> Reset Filters on Columns</button>
+    <button id="ResetRows"> Reset Filters on Rows</button>
   </body>
 </html>
